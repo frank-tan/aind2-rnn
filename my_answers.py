@@ -3,6 +3,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
+from keras.layers import Activation
 import keras
 
 
@@ -34,8 +35,10 @@ def build_part1_RNN(window_size):
 
 ### TODO: return the text input with only ascii lowercase and the punctuation given below included.
 def cleaned_text(text):
-    punctuation = ['!', ',', '.', ':', ';', '?']
-    atypical_chars = ['"', '$', '%', '&', "'", '(', ')', '*', '-', '/', '@', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'à', 'â', 'è', 'é', ' ']
+    unique_chars = set(text)
+    allowed_chars = {'!', ',', '.', ':', ';', '?', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' '}
+    atypical_chars = unique_chars - allowed_chars
+    
     for char in atypical_chars:
         text = text.replace(char,'')
     return text
@@ -47,7 +50,7 @@ def window_transform_text(text, window_size, step_size):
     for i in range(0, len(text) - window_size, step_size):
         inputs.append(text[i: i + window_size])
         
-    outputs = text[window_size::step_size]
+    outputs = list(text[window_size::step_size])
     
     return inputs,outputs
 
@@ -56,6 +59,6 @@ def window_transform_text(text, window_size, step_size):
 def build_part2_RNN(window_size, num_chars):
     model = Sequential()
     model.add(LSTM(200, input_shape=(window_size,num_chars)))
-    model.add(Dense(num_chars, activation='tanh'))
-    model.add(Dense(num_chars, activation='softmax'))
+    model.add(Dense(num_chars, activation='linear'))
+    model.add(Activation('softmax'))
     return model
